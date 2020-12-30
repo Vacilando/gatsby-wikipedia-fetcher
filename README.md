@@ -7,7 +7,7 @@ GatsbyJS plugin with the ability to retrieve various bits of Wikipedia data and 
 
 ## Raison d'être
 
-Wikipedia is the most successful collaborative knowledge base created by humankind. Just as we all contribute to it with our bits of information, it is only natural that we reach for it when we need to incorporate emergent wisdom in other web projects. This is made simple the excellent [MediaWiki API](https://www.mediawiki.org/wiki/API:Main_page).
+Wikipedia is the most successful collaborative knowledge base created by humankind. Just as we all contribute to it with our bits of information, it is only natural that we reach for it when we need to incorporate emergent wisdom in other web projects. This is made simple thanks to the excellent [MediaWiki API](https://www.mediawiki.org/wiki/API:Main_page).
 
 The killer advantage of this approach that the data we use continues to live. Any future updates provided by fellow humans around the world will find their way to your site as well. 
 Copied data starts to age immediately whereas data included provided by an API is always accurate.

@@ -14,16 +14,32 @@ const { createRemoteFileNode } = require("gatsby-source-filesystem")
 // https://www.gatsbyjs.com/docs/reference/config-files/actions/#createNode
 
 exports.sourceNodes = async ({
-    actions, createNodeId, createContentDigest,
-    store, cache, }) => {
+    actions, createNodeId, createContentDigest, store, cache }, pluginOptions) => {
 
     const { createNode } = actions
 
-    var wikiArticle = 'Richard P. Feynman' // 'Richard_Feynman' || 'Richard P. Feynman' || 'https://en.wikipedia.org/wiki/Richard_P._Feynman'
-    var wikiLang = 'en'
-    var wikiUserAgentMail = 'tomi@vacilando.net'
-    //wikiArticle = wikiArticle.replace(/ /g, "_") // Replace spaces by underlines.
-    //console.log('wikiArticle', wikiArticle)
+    var wikiUserAgentMail = pluginOptions.email
+    // Accepted formats: 'Richard_Feynman' || 'Richard P. Feynman' || 'https://en.wikipedia.org/wiki/Richard_P._Feynman'
+    // No need to swap spaces by underlines.
+    var wikiArticles = []
+    var wikiLangs = [] // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
+
+    // Here we need to supply the actual list of articles and languages. //////////////////////////////////////////////
+    wikiArticles = [
+        'Richard P. Feynman',
+        'Thor Heyerdahl',
+    ]
+    wikiLangs = [
+        'en',
+        'en',
+    ]
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    if (wikiArticles.length === 0) {
+        wikiArticles = ['Richard P. Feynman',] // Set demo article if none is defined.
+    }
+
+    var wikiLang = (wikiLangs.length !== 0) ? wikiLangs[0] : '' // Can be removed after fixing https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues/1 Bundle requests by languages #1
 
     // https://www.gatsbyjs.com/docs/debugging-async-lifecycles/#use-promiseall-if-necessary
     /*
@@ -35,12 +51,13 @@ exports.sourceNodes = async ({
     var [page] = await Promise.all([
         //wtf.fetch(wikiArticle, wikiLang, { 'Api-User-Agent': wikiUserAgentMail, }).then((doc) => doc.summary()),
         wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
-            .fetch([wikiArticle, 'Aldous Huxley'], wikiLang, { 'Api-User-Agent': wikiUserAgentMail, })
+            .fetch(wikiArticles, wikiLang, { 'Api-User-Agent': wikiUserAgentMail, })
             .then((docList) => {
                 //var page = docList.map(doc => {
                 return docList.map(doc => {
                     return {
                         title: doc.title(),
+                        url: doc.url(), // (try to) generate the url for the current article
                         summary: doc.summary(),
                         extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
                         firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
@@ -52,6 +69,14 @@ exports.sourceNodes = async ({
     console.log('page outside', page);
 
     page.forEach(async (val, i) => { // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
+        // Processing title
+        var title = page[i].title
+        console.log('title', title)
+
+        // Processing URL
+        var url = page[i].url
+        console.log('url', url)
+
         // Processing summary
         var summary = page[i].summary
         console.log('summary', summary)
@@ -82,6 +107,8 @@ exports.sourceNodes = async ({
 
         // Custom data we want to store in the node.
         var nodeData = {
+            title: title,
+            url: url,
             summary: summary,
             extract: extract,
             firstImage: firstImage,
