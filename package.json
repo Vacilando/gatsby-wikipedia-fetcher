@@ -1,0 +1,32 @@
+{
+  "name": "gatsby-wikipedia-fetcher",
+  "version": "1.0.0",
+  "description": "Gatsby plugin with the ability to retrieve various bits of Wikipedia data and reuse them in your site.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vacilando/gatsby-wikipedia-fetcher.git"
+  },
+  "keywords": [
+    "gatsbyjs",
+    "gatsby",
+    "wikipedia",
+    "api",
+    "fetcher",
+    "parser"
+  ],
+  "author": "Tomáš Fülöpp",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues"
+  },
+  "homepage": "https://github.com/Vacilando/gatsby-wikipedia-fetcher#readme",
+  "dependencies": {
+    "gatsby-source-filesystem": "^2.8.1",
+    "wtf-plugin-summary": "^0.2.0",
+    "wtf_wikipedia": "^8.5.1"
+  }
+}
