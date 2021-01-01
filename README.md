@@ -14,3 +14,10 @@ Copied data starts to age immediately whereas data included provided by an API i
 
 gatsby-wikipedia-fetcher is a plugin that makes it easy to pick larger or smaller pieces of various Wikipedia content (page extract, illustration image, etc.) and include them in your Gatsby site. 
 This plugin stands on the shoulders of the wonderful [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) by [Spencer Kelly](https://github.com/spencermountain) et al.
+
+    {
+      resolve: `gatsby-wikipedia-fetcher`,
+      options: {
+        email: `tomi@vacilando.net`, // E-mail address to be mentioned in the Wikipedia API requests in order to lower the probability of being blocked.
+      },
+    },
