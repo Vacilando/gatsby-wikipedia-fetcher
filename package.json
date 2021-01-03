@@ -11,9 +11,11 @@
     "url": "git+https://github.com/Vacilando/gatsby-wikipedia-fetcher.git"
   },
   "keywords": [
-    "gatsbyjs",
     "gatsby",
+    "gatsby-plugin",
+    "gatsbyjs",
     "wikipedia",
+    "wikimedia",
     "api",
     "fetcher",
     "parser"
