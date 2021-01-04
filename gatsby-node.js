@@ -1,5 +1,6 @@
-const wtf = require('wtf_wikipedia') // import wtf from "wtf_wikipedia" - this syntax does not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
+const wtf = require('wtf_wikipedia') // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
 wtf.extend(require('wtf-plugin-summary'))
+wtf.extend(require('wtf-plugin-html'))
 
 // https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
@@ -26,7 +27,12 @@ exports.sourceNodes = async (
   var wikiLangs = [] // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
 
   // Here we need to supply the actual list of articles and languages. //////////////////////////////////////////////
-  wikiArticles = ['Richard P. Feynman', 'Thor Heyerdahl']
+  wikiArticles = [
+    //'Richard P. Feynman',
+    'Thor Heyerdahl',
+    'Cosmology',
+    'https://en.wikipedia.org/wiki/Cosmology',
+  ]
   wikiLangs = ['en', 'en']
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,12 +55,15 @@ exports.sourceNodes = async (
       .fetch(wikiArticles, wikiLang, { 'Api-User-Agent': wikiUserAgentMail })
       .then(docList => {
         //var page = docList.map(doc => {
-        return docList.map(doc => {
+        return docList.map((doc, i) => {
           return {
+            requestArticle: wikiArticles[i], // We need to know what was requested so that we later match this result to the vorg article.
+            requestLang: wikiLang, // We need to know what was requested so that we later match this result to the vorg article.
             title: doc.title(),
             url: doc.url(), // (try to) generate the url for the current article
             summary: doc.summary(),
             extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
+            extractHTML: doc.sections(0).html(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html
             firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
           }
         })
@@ -65,6 +74,15 @@ exports.sourceNodes = async (
 
   page.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
+
+    // Processing requestArticle.
+    var requestArticle = page[i].requestArticle
+    console.log('requestArticle', requestArticle)
+
+    // Processing requestLang
+    var requestLang = page[i].requestLang
+    console.log('requestLang', requestLang)
+
     // Processing title
     var title = page[i].title
     console.log('title', title)
@@ -80,6 +98,10 @@ exports.sourceNodes = async (
     // Processing extract
     var extract = page[i].extract
     console.log('extract', extract)
+
+    // Processing extract (in HTML)
+    var extractHTML = page[i].extractHTML
+    console.log('extractHTML', extractHTML)
 
     // Processing firstImage
     var firstImage = page[i].firstImage
@@ -103,12 +125,15 @@ exports.sourceNodes = async (
 
     // Custom data we want to store in the node.
     var nodeData = {
+      requestArticle: requestArticle,
+      requestLang: requestLang,
       title: title,
       url: url,
       summary: summary,
       extract: extract,
+      extractHTML: extractHTML,
       firstImage: firstImage,
-      localFile: fileNode ? fileNode.id : '',
+      //localFile: fileNode ? fileNode.id : '',
     }
     console.log('nodeData', nodeData)
 
@@ -128,6 +153,10 @@ exports.sourceNodes = async (
 
     // Now create the node.
     var node = Object.assign({}, nodeData, nodeMeta)
+    // if the file was created, attach the new node to the parent node
+    if (fileNode) {
+      node.localFile___NODE = fileNode.id
+    }
     createNode(node)
   })
 }

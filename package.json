@@ -28,6 +28,7 @@
   "homepage": "https://github.com/Vacilando/gatsby-wikipedia-fetcher#readme",
   "dependencies": {
     "gatsby-source-filesystem": "^2.8.1",
+    "wtf-plugin-html": "^0.2.1",
     "wtf-plugin-summary": "^0.2.0",
     "wtf_wikipedia": "^8.5.1"
   }
