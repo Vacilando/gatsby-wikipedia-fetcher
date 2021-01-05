@@ -1,6 +1,23 @@
-const wtf = require('wtf_wikipedia') // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
-wtf.extend(require('wtf-plugin-summary'))
-wtf.extend(require('wtf-plugin-html'))
+const path = require(`path`)
+
+const wtf = require(path.resolve(
+  './plugins/gatsby-wikipedia-fetcher/node_modules/wtf_wikipedia'
+)) // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
+wtf.extend(
+  require(path.resolve(
+    './plugins/gatsby-wikipedia-fetcher/node_modules/wtf-plugin-summary'
+  ))
+)
+wtf.extend(
+  require(path.resolve(
+    './plugins/gatsby-wikipedia-fetcher/node_modules/wtf-plugin-html'
+  ))
+)
+
+const { WikipediaFetcherList } = require(path.resolve(
+  `./src/components/gatsby-wikipedia-fetcher-list`
+))
+//console.log('WikipediaFetcherList', WikipediaFetcherList())
 
 // https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
@@ -21,23 +38,20 @@ exports.sourceNodes = async (
   const { createNode } = actions
 
   var wikiUserAgentMail = pluginOptions.email
-  // Accepted formats: 'Richard_Feynman' || 'Richard P. Feynman' || 'https://en.wikipedia.org/wiki/Richard_P._Feynman'
-  // No need to swap spaces by underlines.
-  var wikiArticles = []
-  var wikiLangs = [] // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
 
   // Here we need to supply the actual list of articles and languages. //////////////////////////////////////////////
-  wikiArticles = [
-    //'Richard P. Feynman',
-    'Thor Heyerdahl',
-    'Cosmology',
-    'https://en.wikipedia.org/wiki/Cosmology',
-  ]
-  wikiLangs = ['en', 'en']
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // wikiArticles should be an array of Wikipedia article titles (redirects are automatic) or full URLs.
+  // E.g.: 'Richard_Feynman' || 'Richard P. Feynman' || 'https://en.wikipedia.org/wiki/Richard_P._Feynman'
+  // No need to swap spaces by underlines.
+  var wikiArticles = WikipediaFetcherList().articles
+  console.log('wikiArticles', wikiArticles)
+  // wikiLangs should be an array of the languages that match the Wikipedia articles in wikiArticles. Empty string is a possibility, e.g. for the cases where the article is specified by its full URL.
+  // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
+  var wikiLangs = WikipediaFetcherList().languages
+  console.log('wikiLangs', wikiLangs)
 
   if (wikiArticles.length === 0) {
-    wikiArticles = ['Richard P. Feynman'] // Set demo article if none is defined.
+    wikiArticles = ['Richard P. Feynman', 'Thor Heyerdahl'] // Set demo article if none is defined.
   }
 
   var wikiLang = wikiLangs.length !== 0 ? wikiLangs[0] : '' // Can be removed after fixing https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues/1 Bundle requests by languages #1
@@ -63,7 +77,7 @@ exports.sourceNodes = async (
             url: doc.url(), // (try to) generate the url for the current article
             summary: doc.summary(),
             extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
-            extractHTML: doc.sections(0).html(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html
+            extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
             firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
           }
         })
