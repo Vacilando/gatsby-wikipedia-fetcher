@@ -1,17 +1,11 @@
 const path = require(`path`)
 
-const wtf = require(path.resolve(
-  './plugins/gatsby-wikipedia-fetcher/node_modules/wtf_wikipedia'
-)) // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
+const wtf = require('wtf_wikipedia') // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
 wtf.extend(
-  require(path.resolve(
-    './plugins/gatsby-wikipedia-fetcher/node_modules/wtf-plugin-summary'
-  ))
+  require('wtf-plugin-summary')
 )
 wtf.extend(
-  require(path.resolve(
-    './plugins/gatsby-wikipedia-fetcher/node_modules/wtf-plugin-html'
-  ))
+  require('wtf-plugin-html')
 )
 
 const { WikipediaFetcherList } = require(path.resolve(
