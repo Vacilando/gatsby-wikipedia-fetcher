@@ -83,7 +83,7 @@ https://vacilando.org/article/cosmology is an example of a page that shows both 
 
 ## More documentation
 
-A body of additional documentation, links and examples of implementation is growing at
+A body of additional documentation, links and examples of implementation is growing at https://vacilando.org/article/gatsby-wikipedia-fetcher.
 
 We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the documentation page.
 
@@ -93,11 +93,11 @@ Every contribution is very much appreciated. You are welcome to file bugs, featu
 
 ## Maintenance and development
 
-Developed and maintained by [Vacilando](https://github.com/Vacilando) since 2020/12/18 — see the [main article](https://vacilando.org/article/gatsby-plugin-securitytxt).
+Developed and maintained by [Vacilando](https://github.com/Vacilando) since 2020/12/18 — see the [main article](https://vacilando.org/article/gatsby-wikipedia-fetcher).
 
-If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-plugin-security-txt).
+If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-wikipedia-fetcher).
 
 This plugin stands on the shoulders of the excellent [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) parser by [Spencer Kelly](https://github.com/spencermountain) et al.
 
-If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-plugin-security-txt).
+If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-wikipedia-fetcher).
 <sup></sup>
