@@ -8,16 +8,13 @@ GatsbyJS plugin with the ability to retrieve various bits of Wikipedia data and 
 
 ## Raison d'être
 
-Wikipedia is the most successful collaborative knowledge base ever achieved on this planet. Just as we all contribute to it with our bits of information, it is only natural that we reach for it when we need to incorporate some of its data in other web projects. Luckily, this is made simple thanks to the excellent [MediaWiki API](https://www.mediawiki.org/wiki/API:Main_page).
+Wikipedia is the most successful collaborative knowledge base ever achieved on this planet. Just as we all contribute to it with our bits of knowledge, it is only natural that we reach for it when we need to incorporate some of its information in other web projects.
 
-Rather than trying to write the same again and again, we reuse what has already been written and reviewed at Wikipedia.
-
-This project goes even a step further. Not only does it allow to embed bits and pieces of Wikipedia in your own Gatsby project, it also empowers you to _keep the information alive_. That is to say that any future updates provided by fellow humans around the world will automatically find their way to your site as well!
-
-Copied data starts to age immediately whereas data included provided by an API is always accurate.
+Rather than trying to write the same again and again, we reuse what has already been written and reviewed at Wikipedia. Luckily, this is made simple thanks to the excellent [MediaWiki API](https://www.mediawiki.org/wiki/API:Main_page).
 
 gatsby-wikipedia-fetcher is a plugin that makes it easy to pick larger or smaller pieces of various Wikipedia content (page extract, illustration image, etc.) and include them in your Gatsby site.
-This plugin stands on the shoulders of the wonderful [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) by [Spencer Kelly](https://github.com/spencermountain) et al.
+
+Further, it also empowers you to _keep the information alive_. That is to say that any future updates provided by fellow humans around the world will automatically find their way to your site as well. This plugin makes it easy for you to constantly refresh the fetched data with the new versions provided by the Wikipedia API.
 
 ## How to install
 
@@ -43,21 +40,64 @@ module.exports = {
 }
 ```
 
-## Examples of usage
+3. Create a file called "WikipediaFetcherList.js" in your "components" folder (./src/components/WikipediaFetcherList.js) and paste in the following
 
-@TODO
+```javascript
+/**
+ * Supply a list of Wikipedia articles and their languages to gatsby-wikipedia-fetcher.
+ */
+const WikipediaFetcherList = () => {
+  // Array of Wikipedia article titles (redirects are automatic) or full URLs and their language codes (may be empty strings).
+  var articlesLanguages = [
+    { article: 'Richard P. Feynman', language: 'en' },
+    { article: 'https://en.wikipedia.org/wiki/Cosmology', language: 'en' },
+    { article: 'Thor Heyerdahl', language: 'en' },
+  ]
+
+  return articlesLanguages
+}
+
+module.exports.WikipediaFetcherList = WikipediaFetcherList
+```
+
+You can generate the array they way you wish as long as its format is maintained (array of objects consisting of article and language properties).
+
+4. In your http://localhost:8000/___graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
+
+## Features
+
+This plugin is currently able to fetch the following data for each of the specified Wikipedia pages:
+
+- title = Wikipedia page title (after redirects, if any)
+- url = Wikipedia page URL (after redirects, if any)
+- summary = One-line summary of the Wikipedia page
+- extract = Textual extract from the Wikipedia page; this is the same page delivered on the first page of Google search results when the search matches some Wikipedia entry.
+- extractHTML = Same as "extract" but includes the HTML from Wikipedia (links, etc.)
+- firstImage = The first image (if any) from the Wikipedia page; ideal for illustrations on theme pages etc.
+
+If you regularly need to retrieve some other pieces of data, please make a request by creating a ticket at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues.
 
 ## Demo page
 
-https://vacilando.org/article/interstellar-travel is an example of a page that shows both an illustration image and a textual extract from Wikipedia's page on [Interstellar travel](https://en.wikipedia.org/wiki/Interstellar_travel).
+https://vacilando.org/article/cosmology is an example of a page that shows both an illustration image and a textual extract from Wikipedia's page on [Cosmology](https://en.wikipedia.org/wiki/Cosmology).
+
+## More documentation
+
+A body of additional documentation, links and examples of implementation is growing at
+
+We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the documentation page.
 
 ## Contributing
 
-Every contribution is very much appreciated. You are welcome to file bugs, feature- and pull-requests at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues. If you have other questions or collaboration ideas, feel free to contact me directly at https://vacilando.org/contact.
+Every contribution is very much appreciated. You are welcome to file bugs, feature- and pull-requests at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues. If you have other questions or collaboration ideas, feel free to contact the maintainer directly at https://vacilando.org/contact.
 
-## Thanks
+## Maintenance and development
 
-This plugin stands on the shoulders of the excellent [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) parser.
+Developed and maintained by [Vacilando](https://github.com/Vacilando) since 2020/12/18 — see the [main article](https://vacilando.org/article/gatsby-plugin-securitytxt).
+
+If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-plugin-security-txt).
+
+This plugin stands on the shoulders of the excellent [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) parser by [Spencer Kelly](https://github.com/spencermountain) et al.
 
 If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-plugin-security-txt).
 <sup></sup>

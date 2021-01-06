@@ -43,18 +43,10 @@ exports.sourceNodes = async (
   // wikiArticles should be an array of Wikipedia article titles (redirects are automatic) or full URLs.
   // E.g.: 'Richard_Feynman' || 'Richard P. Feynman' || 'https://en.wikipedia.org/wiki/Richard_P._Feynman'
   // No need to swap spaces by underlines.
-  var wikiArticles = WikipediaFetcherList().articles
-  console.log('wikiArticles', wikiArticles)
-  // wikiLangs should be an array of the languages that match the Wikipedia articles in wikiArticles. Empty string is a possibility, e.g. for the cases where the article is specified by its full URL.
+  // Languages that match the Wikipedia articles in wikiArticles. Empty string is a possibility, e.g. for the cases where the article is specified by its full URL.
   // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
-  var wikiLangs = WikipediaFetcherList().languages
-  console.log('wikiLangs', wikiLangs)
-
-  if (wikiArticles.length === 0) {
-    wikiArticles = ['Richard P. Feynman', 'Thor Heyerdahl'] // Set demo article if none is defined.
-  }
-
-  var wikiLang = wikiLangs.length !== 0 ? wikiLangs[0] : '' // Can be removed after fixing https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues/1 Bundle requests by languages #1
+  var wikiArticlesLanguages = WikipediaFetcherList()
+  //console.log('wikiArticlesLanguages', wikiArticlesLanguages)
 
   // https://www.gatsbyjs.com/docs/debugging-async-lifecycles/#use-promiseall-if-necessary
   /*
@@ -63,12 +55,28 @@ exports.sourceNodes = async (
         wtf.fetch(wikiArticle).then((doc) => doc ? doc.images(0).url() : ""), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
     ])
     */
+
+  /* Retrieving a number of pages at once is problematic because
+   * How to link fetch requests with their results in bundled calls #417 https://github.com/spencermountain/wtf_wikipedia/issues/417
+   * Fetching an array fails if there's a full URL #416 https://github.com/spencermountain/wtf_wikipedia/issues/416
+   * How to specify language per article in a group fetch? #414 https://github.com/spencermountain/wtf_wikipedia/issues/414
+   * So we put this on ice for a while and go for sequential calls for now.
+   */
+  /*
+  var wikiLang = wikiLangs.length !== 0 ? wikiLangs[0] : '' // Can be removed after fixing https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues/1 Bundle requests by languages #1
+
   var [page] = await Promise.all([
-    //wtf.fetch(wikiArticle, wikiLang, { 'Api-User-Agent': wikiUserAgentMail, }).then((doc) => doc.summary()),
     wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
       .fetch(wikiArticles, wikiLang, { 'Api-User-Agent': wikiUserAgentMail })
       .then(docList => {
-        //var page = docList.map(doc => {
+        console.log('wikiArticles', wikiArticles)
+        //console.log('docList.title()', docList.title())
+        if (typeof docList[0] === 'undefined') {
+          // docList is normally an array of objects, but due to a quirk in wtf_wikipedia it becomes just an object if there's just 1 result of the fetch. So we need to make an array of it. (NB wtf_wikipedia also deduplicates so [ 'Cosmology', 'https://en.wikipedia.org/wiki/Cosmology'] returns 1 result.)
+          // See issue Fetching an array does not return array if there's just one item #418 https://github.com/spencermountain/wtf_wikipedia/issues/418
+          docList = [docList]
+        }
+        //console.log('docList.title()', docList[0].title())
         return docList.map((doc, i) => {
           return {
             requestArticle: wikiArticles[i], // We need to know what was requested so that we later match this result to the vorg article.
@@ -85,45 +93,87 @@ exports.sourceNodes = async (
       }),
   ])
   console.log('page outside', page)
-
   page.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
+    ...
+  }
+  */
+
+  wikiArticlesLanguages.forEach(async (val, i) => {
+    // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
+
+    var [page] = await Promise.all([
+      wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
+        .fetch(
+          wikiArticlesLanguages[i].article,
+          wikiArticlesLanguages[i].language,
+          {
+            'Api-User-Agent': wikiUserAgentMail,
+          }
+        )
+        .then(docList => {
+          //console.log('wikiArticles[i]', wikiArticles[i])
+          //console.log('docList.title()', docList.title())
+          //console.log('typeof docList[0]', typeof docList[0])
+          if (typeof docList[0] === 'undefined') {
+            // docList is normally an array of objects, but due to a quirk in wtf_wikipedia it becomes just an object if there's just 1 result of the fetch. So we need to make an array of it. (NB wtf_wikipedia also deduplicates so [ 'Cosmology', 'https://en.wikipedia.org/wiki/Cosmology'] returns 1 result.)
+            // See issue Fetching an array does not return array if there's just one item #418 https://github.com/spencermountain/wtf_wikipedia/issues/418
+            docList = [docList]
+          }
+          //console.log('docList.title()', docList[0].title())
+          return docList.map(doc => {
+            return {
+              requestArticle: wikiArticlesLanguages[i].article, // We need to know what was requested so that we later match this result to the vorg article.
+              requestLang: wikiArticlesLanguages[i].language, // We need to know what was requested so that we later match this result to the vorg article.
+              title: doc.title(),
+              url: doc.url(), // (try to) generate the url for the current article
+              summary: doc.summary(),
+              extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
+              extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
+              firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
+            }
+          })
+          //console.log('page inside', page);
+        }),
+    ])
+    //console.log('page outside', page)
+
+    page = page[0]
 
     // Processing requestArticle.
-    var requestArticle = page[i].requestArticle
-    console.log('requestArticle', requestArticle)
+    var requestArticle = page.requestArticle
+    //console.log('requestArticle', requestArticle)
 
     // Processing requestLang
-    var requestLang = page[i].requestLang
-    console.log('requestLang', requestLang)
+    var requestLang = page.requestLang
+    //console.log('requestLang', requestLang)
 
     // Processing title
-    var title = page[i].title
-    console.log('title', title)
+    var title = page.title
+    //console.log('title', title)
 
     // Processing URL
-    var url = page[i].url
-    console.log('url', url)
+    var url = page.url
+    //console.log('url', url)
 
     // Processing summary
-    var summary = page[i].summary
-    console.log('summary', summary)
+    var summary = page.summary
+    //console.log('summary', summary)
 
     // Processing extract
-    var extract = page[i].extract
-    console.log('extract', extract)
+    var extract = page.extract
+    //console.log('extract', extract)
 
     // Processing extract (in HTML)
-    var extractHTML = page[i].extractHTML
-    console.log('extractHTML', extractHTML)
+    var extractHTML = page.extractHTML
+    //console.log('extractHTML', extractHTML)
 
     // Processing firstImage
-    var firstImage = page[i].firstImage
-    console.log('firstImage', firstImage)
+    var firstImage = page.firstImage
+    //console.log('firstImage', firstImage)
     // Create a local version of the remote image. See https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
     // https://www.gatsbyjs.com/plugins/gatsby-source-filesystem/
 
-    ///*
     var fileNode = false
     if (firstImage) {
       fileNode = await createRemoteFileNode({
@@ -135,7 +185,6 @@ exports.sourceNodes = async (
         store,
       })
     }
-    //*/
 
     // Custom data we want to store in the node.
     var nodeData = {
@@ -149,7 +198,7 @@ exports.sourceNodes = async (
       firstImage: firstImage,
       //localFile: fileNode ? fileNode.id : '',
     }
-    console.log('nodeData', nodeData)
+    //console.log('nodeData', nodeData)
 
     // Compulsory fields; see https://www.gatsbyjs.com/docs/reference/config-files/actions/#createNode
     var nodeMeta = {
@@ -163,7 +212,7 @@ exports.sourceNodes = async (
         contentDigest: createContentDigest(nodeData), // Compulsory.
       },
     }
-    console.log('nodeMeta', nodeMeta)
+    //console.log('nodeMeta', nodeMeta)
 
     // Now create the node.
     var node = Object.assign({}, nodeData, nodeMeta)
