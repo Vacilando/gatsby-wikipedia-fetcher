@@ -1,7 +1,6 @@
 # Gatsby Wikipedia Fetcher
 
 <sup></sup>
-
 ## TL;DR
 
 GatsbyJS plugin with the ability to retrieve various bits of Wikipedia data and reuse them in your site.

@@ -15,6 +15,7 @@ const { WikipediaFetcherList } = require(path.resolve(
 
 // https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
+const { array } = require('prop-types')
 
 /**
  * Implement Gatsby's Node APIs in this file.
@@ -41,6 +42,11 @@ exports.sourceNodes = async (
   // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
   var wikiArticlesLanguages = WikipediaFetcherList()
   //console.log('wikiArticlesLanguages', wikiArticlesLanguages)
+
+  if (!Array.isArray(wikiArticlesLanguages) || wikiArticlesLanguages.length === 0) {
+    console.log('There are no Wikipedia articles to be fetched.')
+    return
+  }
 
   // https://www.gatsbyjs.com/docs/debugging-async-lifecycles/#use-promiseall-if-necessary
   /*
@@ -92,6 +98,8 @@ exports.sourceNodes = async (
     ...
   }
   */
+
+  console.log('Fetching ' + wikiArticlesLanguages.length + ' items from Wikipedia.')
 
   wikiArticlesLanguages.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
@@ -163,13 +171,17 @@ exports.sourceNodes = async (
     //console.log('extractHTML', extractHTML)
 
     // Processing firstImage
-    var firstImage = page.firstImage
+    var firstImage = '' // Use empty string instead of false because the property must be created in nodeData.
+    if (page.firstImage.match(/.(jpg|jpeg|png|gif)$/i)) {
+      // valid formats: jpg, jpeg, png, webp
+      firstImage = page.firstImage
+      }
     //console.log('firstImage', firstImage)
     // Create a local version of the remote image. See https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
     // https://www.gatsbyjs.com/plugins/gatsby-source-filesystem/
 
     var fileNode = false
-    if (firstImage) {
+    if (firstImage !== '') { // Create an image node only if firstImage is an empty string.
       fileNode = await createRemoteFileNode({
         url: firstImage,
         //parentNodeId: nodeID,
