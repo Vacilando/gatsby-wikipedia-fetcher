@@ -27,10 +27,26 @@ const { array } = require('prop-types')
 // https://www.gatsbyjs.com/docs/reference/config-files/actions/#createNode
 
 exports.sourceNodes = async (
-  { actions, createNodeId, createContentDigest, store, cache },
-  pluginOptions
+  { actions, createNodeId, createContentDigest, store, cache, getNodes },
+  pluginOptions,
 ) => {
   const { createNode } = actions
+
+  /*
+  console.log('hereeeeee')
+  getNodes().forEach(node => {
+    if (node.internal.owner === `gatsby-source-drupal`) {
+      if (node.field_wikipedia_article) {
+        console.log('———————————————--')
+        console.log(node.parent_id)
+        console.log(node.field_wikipedia_article)
+        console.log(node.field_wikipedia_language)
+      }
+
+    }
+  }); // Process sync data from Drupal.
+  //console.log(getNodes())
+  */
 
   var wikiUserAgentMail = pluginOptions.email
 
@@ -40,13 +56,29 @@ exports.sourceNodes = async (
   // No need to swap spaces by underlines.
   // Languages that match the Wikipedia articles in wikiArticles. Empty string is a possibility, e.g. for the cases where the article is specified by its full URL.
   // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
-  var wikiArticlesLanguages = WikipediaFetcherList()
-  //console.log('wikiArticlesLanguages', wikiArticlesLanguages)
+  const wikiArticlesLanguages_initial = WikipediaFetcherList(getNodes)
+  //console.log('wikiArticlesLanguages_initial', wikiArticlesLanguages_initial)
 
-  if (!Array.isArray(wikiArticlesLanguages) || wikiArticlesLanguages.length === 0) {
+  // Do not continue if there's no input data.
+  if (!Array.isArray(wikiArticlesLanguages_initial) || wikiArticlesLanguages_initial.length === 0) {
     console.log('There are no Wikipedia articles to be fetched.')
     return
   }
+  
+  // Deduplicate the array of objects -- see https://stackoverflow.com/questions/2218999/remove-duplicates-from-an-array-of-objects-in-javascript/36744732#36744732
+  const things = new Object()
+  things.thing = new Array()
+  things.thing = wikiArticlesLanguages_initial
+  const wikiArticlesLanguages = things.thing.filter((thing, index) => {
+    const _thing = JSON.stringify(thing)
+    return (
+      index ===
+      things.thing.findIndex(obj => {
+        return JSON.stringify(obj) === _thing
+      })
+    )
+  })
+  //console.log('wikiArticlesLanguages', wikiArticlesLanguages)
 
   // https://www.gatsbyjs.com/docs/debugging-async-lifecycles/#use-promiseall-if-necessary
   /*

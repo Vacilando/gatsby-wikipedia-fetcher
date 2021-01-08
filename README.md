@@ -15,6 +15,19 @@ gatsby-wikipedia-fetcher is a plugin that makes it easy to pick larger or smalle
 
 Further, it also empowers you to _keep the information alive_. That is to say that any future updates provided by fellow humans around the world will automatically find their way to your site as well. This plugin makes it easy for you to constantly refresh the fetched data with the new versions provided by the Wikipedia API.
 
+## Features
+
+This plugin is currently able to fetch the following data for each of the specified Wikipedia pages:
+
+- title = Wikipedia page title (after redirects, if any)
+- url = Wikipedia page URL (after redirects, if any)
+- summary = One-line summary of the Wikipedia page
+- extract = Textual extract from the Wikipedia page; this is the same page delivered on the first page of Google search results when the search matches some Wikipedia entry.
+- extractHTML = Same as "extract" but includes the HTML from Wikipedia (links, etc.)
+- firstImage = The first image (if any) from the Wikipedia page; ideal for illustrations on theme pages etc.
+
+If you regularly need to retrieve some other pieces of data, please make a request by creating a ticket at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues.
+
 ## How to install
 
 1. Install the package with **npm** or **yarn**
@@ -45,7 +58,7 @@ module.exports = {
 /**
  * Supply a list of Wikipedia articles and their languages to gatsby-wikipedia-fetcher.
  */
-const WikipediaFetcherList = () => {
+const WikipediaFetcherList = getNodes => {
   // Array of Wikipedia article titles (redirects are automatic) or full URLs and their language codes (may be empty strings).
   var articlesLanguages = [
     { article: 'Richard P. Feynman', language: 'en' },
@@ -59,32 +72,29 @@ const WikipediaFetcherList = () => {
 module.exports.WikipediaFetcherList = WikipediaFetcherList
 ```
 
-You can generate the array they way you wish as long as its format is maintained (array of objects consisting of article and language properties).
+You can generate the array any way you wish as long as its format is maintained (array of objects consisting of article and language properties). You can use function getNodes() as a source of data. The exact implementation will depend on your data sources and structure.
+
+In the following example we retrieve the data from node fields field_wikipedia_article and field_wikipedia_language like this:
+
+```javascript
+var articlesLanguages = []
+getNodes().forEach(node => {
+  if (node.field_wikipedia_article) {
+    articlesLanguages.push({
+      article: node.field_wikipedia_article,
+      language: node.field_wikipedia_language,
+    })
+  }
+})
+```
 
 4. In your http://localhost:8000/___graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
-
-## Features
-
-This plugin is currently able to fetch the following data for each of the specified Wikipedia pages:
-
-- title = Wikipedia page title (after redirects, if any)
-- url = Wikipedia page URL (after redirects, if any)
-- summary = One-line summary of the Wikipedia page
-- extract = Textual extract from the Wikipedia page; this is the same page delivered on the first page of Google search results when the search matches some Wikipedia entry.
-- extractHTML = Same as "extract" but includes the HTML from Wikipedia (links, etc.)
-- firstImage = The first image (if any) from the Wikipedia page; ideal for illustrations on theme pages etc.
-
-If you regularly need to retrieve some other pieces of data, please make a request by creating a ticket at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues.
 
 ## Demo page
 
 https://vacilando.org/article/cosmology is an example of a page that shows both an illustration image and a textual extract from Wikipedia's page on [Cosmology](https://en.wikipedia.org/wiki/Cosmology).
 
-## More documentation
-
-A body of additional documentation, links and examples of implementation is growing at https://vacilando.org/article/gatsby-wikipedia-fetcher.
-
-We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the documentation page.
+We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the  [documentation page](https://vacilando.org/article/gatsby-wikipedia-fetcher).
 
 ## Contributing
 
