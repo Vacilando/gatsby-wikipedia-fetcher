@@ -94,8 +94,6 @@ Every contribution is very much appreciated. You are welcome to file bugs, featu
 
 Developed and maintained by [Vacilando](https://github.com/Vacilando) since 2020/12/18 — see the [main article](https://vacilando.org/article/gatsby-wikipedia-fetcher).
 
-If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-wikipedia-fetcher).
-
 This plugin stands on the shoulders of the excellent [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia) parser by [Spencer Kelly](https://github.com/spencermountain) et al.
 
 If this plugin is helpful for you, please star it on [GitHub](https://github.com/Vacilando/gatsby-wikipedia-fetcher).
