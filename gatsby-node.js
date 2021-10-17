@@ -69,7 +69,9 @@ exports.sourceNodes = async (
     !Array.isArray(wikiArticlesLanguages_initial) ||
     wikiArticlesLanguages_initial.length === 0
   ) {
-    console.log('[gatsby-wikipedia-fetcher] There are no Wikipedia articles to be fetched.');
+    console.log(
+      '[gatsby-wikipedia-fetcher] There are no Wikipedia articles to be fetched.'
+    );
     return;
   }
 
@@ -139,64 +141,78 @@ exports.sourceNodes = async (
   }
   */
 
-  var cachedGWF
-  var cacheReported = false
-  var milliSecondsCache = 0 // Default value = no cache (in case pluginOptions.cache is not set).
+  var cachedGWF;
+  var cacheReported = false;
+  var milliSecondsCache = 0; // Default value = no cache (in case pluginOptions.cache is not set).
   if (pluginOptions.cache) {
-    milliSecondsCache = pluginOptions.cache * 1000
+    milliSecondsCache = pluginOptions.cache * 1000;
   }
-wikiArticlesLanguages.forEach(async (val, i) => {
+  wikiArticlesLanguages.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
 
-    cachedGWF = await cache.get('gatsby-wikipedia-fetcher_cache_' + i)
-    if (cachedGWF && (Date.now() - cachedGWF[1] > milliSecondsCache)) { // If the cache expired, don't use it.
-      cachedGWF = false
+    cachedGWF = await cache.get('gatsby-wikipedia-fetcher_cache_' + i);
+    if (cachedGWF && Date.now() - cachedGWF[1] > milliSecondsCache) {
+      // If the cache expired, don't use it.
+      cachedGWF = false;
     }
     if (!cachedGWF) {
       var [page] = await Promise.all([
-      wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
-        .fetch(
-          wikiArticlesLanguages[i].article,
-          wikiArticlesLanguages[i].language,
-          {
-            'Api-User-Agent': wikiUserAgentMail,
-          }
-        )
-        .then((docList) => {
-          //console.log('wikiArticles[i]', wikiArticles[i])
-          //console.log('docList.title()', docList.title())
-          //console.log('typeof docList[0]', typeof docList[0])
-          if (typeof docList[0] === 'undefined') {
-            // docList is normally an array of objects, but due to a quirk in wtf_wikipedia it becomes just an object if there's just 1 result of the fetch. So we need to make an array of it. (NB wtf_wikipedia also deduplicates so [ 'Cosmology', 'https://en.wikipedia.org/wiki/Cosmology'] returns 1 result.)
-            // See issue Fetching an array does not return array if there's just one item #418 https://github.com/spencermountain/wtf_wikipedia/issues/418
-            docList = [docList];
-          }
-          //console.log('docList.title()', docList[0].title())
-          return docList.map((doc) => {
-            return {
-              requestArticle: wikiArticlesLanguages[i].article, // We need to know what was requested so that we later match this result to the vorg article.
-              requestLang: wikiArticlesLanguages[i].language, // We need to know what was requested so that we later match this result to the vorg article.
-              title: doc.title(),
-              url: doc.url(), // (try to) generate the url for the current article
-              summary: doc.summary(),
-              extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
-              extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
-              firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
-            };
-          });
-        }),
+        wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
+          .fetch(
+            wikiArticlesLanguages[i].article,
+            wikiArticlesLanguages[i].language,
+            {
+              'Api-User-Agent': wikiUserAgentMail,
+            }
+          )
+          .then((docList) => {
+            //console.log('wikiArticles[i]', wikiArticles[i])
+            //console.log('docList.title()', docList.title())
+            //console.log('typeof docList[0]', typeof docList[0])
+            if (typeof docList[0] === 'undefined') {
+              // docList is normally an array of objects, but due to a quirk in wtf_wikipedia it becomes just an object if there's just 1 result of the fetch. So we need to make an array of it. (NB wtf_wikipedia also deduplicates so [ 'Cosmology', 'https://en.wikipedia.org/wiki/Cosmology'] returns 1 result.)
+              // See issue Fetching an array does not return array if there's just one item #418 https://github.com/spencermountain/wtf_wikipedia/issues/418
+              docList = [docList];
+            }
+            //console.log('docList.title()', docList[0].title())
+            return docList.map((doc) => {
+              return {
+                requestArticle: wikiArticlesLanguages[i].article, // We need to know what was requested so that we later match this result to the vorg article.
+                requestLang: wikiArticlesLanguages[i].language, // We need to know what was requested so that we later match this result to the vorg article.
+                title: doc.title(),
+                url: doc.url(), // (try to) generate the url for the current article
+                summary: doc.summary(),
+                extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
+                extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
+                firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
+              };
+            });
+          }),
       ]);
       page = page[0];
-      await cache.set('gatsby-wikipedia-fetcher_cache_' + i, [page, Date.now()])
-      if (cacheReported === false) { // Report - but just once! - whether we use cache or not
-        reporter.info('[gatsby-wikipedia-fetcher] Fetching ' + wikiArticlesLanguages.length + ' items from Wikipedia API.');
-        cacheReported = true
-      } 
-      } else {
-      page = cachedGWF[0]
-      if (cacheReported === false) { // Report - but just once! - whether we use cache or not
-        reporter.info('[gatsby-wikipedia-fetcher] Fetching ' + wikiArticlesLanguages.length + ' Wikipedia items from Gatsby cache.');
-        cacheReported = true
+      await cache.set('gatsby-wikipedia-fetcher_cache_' + i, [
+        page,
+        Date.now(),
+      ]);
+      if (cacheReported === false) {
+        // Report - but just once! - whether we use cache or not
+        reporter.info(
+          '[gatsby-wikipedia-fetcher] Fetching ' +
+            wikiArticlesLanguages.length +
+            ' items from Wikipedia API.'
+        );
+        cacheReported = true;
+      }
+    } else {
+      page = cachedGWF[0];
+      if (cacheReported === false) {
+        // Report - but just once! - whether we use cache or not
+        reporter.info(
+          '[gatsby-wikipedia-fetcher] Fetching ' +
+            wikiArticlesLanguages.length +
+            ' Wikipedia items from Gatsby cache.'
+        );
+        cacheReported = true;
       }
     }
 
