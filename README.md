@@ -1,6 +1,7 @@
 # Gatsby Wikipedia Fetcher
 
 <sup></sup>
+
 ## TL;DR
 
 GatsbyJS plugin with the ability to retrieve various bits of Wikipedia data and reuse them in your site.
@@ -46,10 +47,12 @@ module.exports = {
       options: {
         // E-mail address to be included in the Wikipedia API calls to limit the risk of being blacklisted.
         email: `user@example.com`,
+        // How many seconds to keep the fetched Wikipedia data in Gatsby cache.
+        cache: 3600 * 24,
       },
     },
   ],
-}
+};
 ```
 
 3. Create a file called "WikipediaFetcherList.js" in your "components" folder (./src/components/WikipediaFetcherList.js) and paste in the following
@@ -58,18 +61,18 @@ module.exports = {
 /**
  * Supply a list of Wikipedia articles and their languages to gatsby-wikipedia-fetcher.
  */
-const WikipediaFetcherList = getNodes => {
+const WikipediaFetcherList = (getNodes) => {
   // Array of Wikipedia article titles (redirects are automatic) or full URLs and their language codes (may be empty strings).
   var articlesLanguages = [
     { article: 'Richard P. Feynman', language: 'en' },
     { article: 'https://en.wikipedia.org/wiki/Cosmology', language: 'en' },
     { article: 'Thor Heyerdahl', language: 'en' },
-  ]
+  ];
 
-  return articlesLanguages
-}
+  return articlesLanguages;
+};
 
-module.exports.WikipediaFetcherList = WikipediaFetcherList
+module.exports.WikipediaFetcherList = WikipediaFetcherList;
 ```
 
 You can generate the array any way you wish as long as its format is maintained (array of objects consisting of article and language properties). You can use function getNodes() as a source of data. The exact implementation will depend on your data sources and structure.
@@ -77,24 +80,24 @@ You can generate the array any way you wish as long as its format is maintained 
 In the following example we retrieve the data from node fields field_wikipedia_article and field_wikipedia_language like this:
 
 ```javascript
-var articlesLanguages = []
-getNodes().forEach(node => {
+var articlesLanguages = [];
+getNodes().forEach((node) => {
   if (node.field_wikipedia_article) {
     articlesLanguages.push({
       article: node.field_wikipedia_article,
       language: node.field_wikipedia_language,
-    })
+    });
   }
-})
+});
 ```
 
-4. In your http://localhost:8000/___graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
+4. In your http://localhost:8000/\_\_\_graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
 
 ## Demo page
 
 https://vacilando.org/article/cosmology is an example of a page that shows both an illustration image and a textual extract from Wikipedia's page on [Cosmology](https://en.wikipedia.org/wiki/Cosmology).
 
-We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the  [documentation page](https://vacilando.org/article/gatsby-wikipedia-fetcher).
+We also welcome links to sites that make use of this plugin. Send us a representative URL via https://vacilando.org/contact and we will consider it for inclusion on the [documentation page](https://vacilando.org/article/gatsby-wikipedia-fetcher).
 
 ## Contributing
 

@@ -36,7 +36,7 @@ exports.sourceNodes = async (
 ) => {
   const { createNode } = actions;
 
-  reporter.info(`Starting to fetch all data from Wikipedia`);
+  reporter.info(`[gatsby-wikipedia-fetcher] Starting to fetch Wikipedia data.`);
   /*
   console.log('hereeeeee')
   getNodes().forEach(node => {
@@ -69,7 +69,7 @@ exports.sourceNodes = async (
     !Array.isArray(wikiArticlesLanguages_initial) ||
     wikiArticlesLanguages_initial.length === 0
   ) {
-    console.log('There are no Wikipedia articles to be fetched.');
+    console.log('[gatsby-wikipedia-fetcher] There are no Wikipedia articles to be fetched.');
     return;
   }
 
@@ -139,14 +139,21 @@ exports.sourceNodes = async (
   }
   */
 
-  console.log(
-    'Fetching ' + wikiArticlesLanguages.length + ' items from Wikipedia.'
-  );
-
-  wikiArticlesLanguages.forEach(async (val, i) => {
+  var cachedGWF
+  var cacheReported = false
+  var milliSecondsCache = 0 // Default value = no cache (in case pluginOptions.cache is not set).
+  if (pluginOptions.cache) {
+    milliSecondsCache = pluginOptions.cache * 1000
+  }
+wikiArticlesLanguages.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
 
-    var [page] = await Promise.all([
+    cachedGWF = await cache.get('gatsby-wikipedia-fetcher_cache_' + i)
+    if (cachedGWF && (Date.now() - cachedGWF[1] > milliSecondsCache)) { // If the cache expired, don't use it.
+      cachedGWF = false
+    }
+    if (!cachedGWF) {
+      var [page] = await Promise.all([
       wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
         .fetch(
           wikiArticlesLanguages[i].article,
@@ -177,12 +184,21 @@ exports.sourceNodes = async (
               firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
             };
           });
-          //console.log('page inside', page);
         }),
-    ]);
-    //console.log('page outside', page)
-
-    page = page[0];
+      ]);
+      page = page[0];
+      await cache.set('gatsby-wikipedia-fetcher_cache_' + i, [page, Date.now()])
+      if (cacheReported === false) { // Report - but just once! - whether we use cache or not
+        reporter.info('[gatsby-wikipedia-fetcher] Fetching ' + wikiArticlesLanguages.length + ' items from Wikipedia API.');
+        cacheReported = true
+      } 
+      } else {
+      page = cachedGWF[0]
+      if (cacheReported === false) { // Report - but just once! - whether we use cache or not
+        reporter.info('[gatsby-wikipedia-fetcher] Fetching ' + wikiArticlesLanguages.length + ' Wikipedia items from Gatsby cache.');
+        cacheReported = true
+      }
+    }
 
     // Processing requestArticle.
     var requestArticle = page.requestArticle;
