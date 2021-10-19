@@ -29,6 +29,8 @@ This plugin is currently able to fetch the following data for each of the specif
 
 If you regularly need to retrieve some other pieces of data, please make a request by creating a ticket at https://github.com/Vacilando/gatsby-wikipedia-fetcher/issues.
 
+There is also a configuration option to cache the data fetched from Wikipedia in Gatsby cache, so that it does not need to be fetched at each build.
+
 ## How to install
 
 1. Install the package with **npm** or **yarn**
