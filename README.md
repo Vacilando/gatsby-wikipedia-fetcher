@@ -57,7 +57,7 @@ module.exports = {
 };
 ```
 
-3. Create a file called "WikipediaFetcherList.js" in your "components" folder (./src/components/WikipediaFetcherList.js) and paste in the following
+3. Create a file called "gatsby-wikipedia-fetcher-list.js" in your "components" folder (./src/components/gatsby-wikipedia-fetcher-list.js) and paste in the following
 
 ```javascript
 /**
