@@ -184,7 +184,7 @@ exports.sourceNodes = async (
                 summary: doc.summary(),
                 extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
                 extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
-                firstImage: doc.image(0).url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
+                firstImage: doc.image(0)?.url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
               };
             });
           }),
@@ -246,7 +246,7 @@ exports.sourceNodes = async (
 
     // Processing firstImage
     var firstImage = ''; // Use empty string instead of false because the property must be created in nodeData.
-    if (page.firstImage.match(/.(jpg|jpeg|png|gif)$/i)) {
+    if (page.firstImage?.match(/.(jpg|jpeg|png|gif)$/i)) {
       // valid formats: jpg, jpeg, png, webp
       firstImage = page.firstImage;
     }
