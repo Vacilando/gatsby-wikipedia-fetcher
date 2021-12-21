@@ -3,6 +3,7 @@ const path = require(`path`);
 const wtf = require('wtf_wikipedia'); // Syntax 'import wtf from "wtf_wikipedia"' would not work yet as this is run by node.js, see https://github.com/gatsbyjs/gatsby/issues/7810
 wtf.extend(require('wtf-plugin-summary'));
 wtf.extend(require('wtf-plugin-html'));
+wtf.extend(require('wtf-plugin-image'));
 
 const { WikipediaFetcherList } = require(path.resolve(
   `./src/components/gatsby-wikipedia-fetcher-list`
@@ -69,8 +70,8 @@ exports.sourceNodes = async (
     !Array.isArray(wikiArticlesLanguages_initial) ||
     wikiArticlesLanguages_initial.length === 0
   ) {
-    console.log(
-      '[gatsby-wikipedia-fetcher] There are no Wikipedia articles to be fetched.'
+    reporter.warn(
+      `[gatsby-wikipedia-fetcher] There are no Wikipedia articles to be fetched.`
     );
     return;
   }
