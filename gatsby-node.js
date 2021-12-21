@@ -177,6 +177,18 @@ exports.sourceNodes = async (
             }
             //console.log('docList.title()', docList[0].title())
             return docList.map((doc) => {
+              // Get URL of the first image, if any https://www.npmjs.com/package/wtf-plugin-image
+              let firstImageURL = doc.image(0);
+              if (firstImageURL) {
+                firstImageURL = firstImageURL.commonsURL();
+                if (!firstImageURL.match(/.(jpg|jpeg|png|gif)$/i)) {
+                  // Only allow jpg|jpeg|png|gif
+                  firstImageURL = '';
+                }
+              } else {
+                firstImageURL = '';
+              }
+
               return {
                 requestArticle: wikiArticlesLanguages[i].article, // We need to know what was requested so that we later match this result to the vorg article.
                 requestLang: wikiArticlesLanguages[i].language, // We need to know what was requested so that we later match this result to the vorg article.
@@ -185,7 +197,8 @@ exports.sourceNodes = async (
                 summary: doc.summary(),
                 extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
                 extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
-                firstImage: doc.image(0)?.url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
+                //firstImage: doc.image(0)?.url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
+                firstImage: firstImageURL,
               };
             });
           }),
@@ -246,15 +259,11 @@ exports.sourceNodes = async (
     //console.log('extractHTML', extractHTML)
 
     // Processing firstImage
-    var firstImage = ''; // Use empty string instead of false because the property must be created in nodeData.
-    if (page.firstImage?.match(/.(jpg|jpeg|png|gif)$/i)) {
-      // valid formats: jpg, jpeg, png, webp
-      firstImage = page.firstImage;
-    }
+    var firstImage = page.firstImage;
     //console.log('firstImage', firstImage)
+
     // Create a local version of the remote image. See https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
     // https://www.gatsbyjs.com/plugins/gatsby-source-filesystem/
-
     var fileNode = false;
     if (firstImage !== '') {
       // Create an image node only if firstImage is an empty string.
