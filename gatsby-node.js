@@ -151,7 +151,7 @@ exports.sourceNodes = async (
   wikiArticlesLanguages.forEach(async (val, i) => {
     // Crucial to use "async" in forEach in order to be able to use "await" for createRemoteFileNode
 
-    cachedGWF = await cache.get('gatsby-wikipedia-fetcher_cache_' + i);
+    cachedGWF = await cache.get('gatsby-wikipedia-fetcher_cache_' + i); // https://www.gatsbyjs.com/docs/reference/config-files/node-api-helpers/#GatsbyCache
     if (cachedGWF && Date.now() - cachedGWF[1] > milliSecondsCache) {
       // If the cache expired, don't use it.
       cachedGWF = false;
