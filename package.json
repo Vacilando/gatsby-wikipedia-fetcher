@@ -1,6 +1,6 @@
 {
   "name": "gatsby-wikipedia-fetcher",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Gatsby plugin with the ability to retrieve various bits of Wikipedia data and reuse them in your site.",
   "main": "index.js",
   "scripts": {
@@ -30,7 +30,7 @@
     "gatsby-source-filesystem": "^4.*",
     "wtf-plugin-html": "^0.2.*",
     "wtf-plugin-image": "^0.3.*",
-    "wtf-plugin-summary": "^0.3.*",
+    "wtf-plugin-summary": "^0.2.*",
     "wtf_wikipedia": "^9.*"
   }
 }
