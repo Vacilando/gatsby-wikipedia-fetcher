@@ -8,7 +8,6 @@ wtf.extend(require('wtf-plugin-image'));
 const { WikipediaFetcherList } = require(path.resolve(
   `./src/components/gatsby-wikipedia-fetcher-list`
 ));
-//console.log('WikipediaFetcherList', WikipediaFetcherList())
 
 // https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
@@ -38,21 +37,6 @@ exports.sourceNodes = async (
   const { createNode } = actions;
 
   reporter.info(`[gatsby-wikipedia-fetcher] Starting to fetch Wikipedia data.`);
-  /*
-  console.log('hereeeeee')
-  getNodes().forEach(node => {
-    if (node.internal.owner === `gatsby-source-drupal`) {
-      if (node.field_wikipedia_article) {
-        console.log('———————————————--')
-        console.log(node.parent_id)
-        console.log(node.field_wikipedia_article)
-        console.log(node.field_wikipedia_language)
-      }
-
-    }
-  }); // Process sync data from Drupal.
-  //console.log(getNodes())
-  */
 
   var wikiUserAgentMail = pluginOptions.email;
 
@@ -63,7 +47,6 @@ exports.sourceNodes = async (
   // Languages that match the Wikipedia articles in wikiArticles. Empty string is a possibility, e.g. for the cases where the article is specified by its full URL.
   // Default language = none specified. wtf_wikipedia allows that for requests that are specific enough, like unique articles, full Wikipedia URLs, etc.
   const wikiArticlesLanguages_initial = WikipediaFetcherList(getNodes);
-  //console.log('wikiArticlesLanguages_initial', wikiArticlesLanguages_initial)
 
   // Do not continue if there's no input data.
   if (
@@ -89,7 +72,6 @@ exports.sourceNodes = async (
       })
     );
   });
-  //console.log('wikiArticlesLanguages', wikiArticlesLanguages)
 
   // https://www.gatsbyjs.com/docs/debugging-async-lifecycles/#use-promiseall-if-necessary
   /*
@@ -167,15 +149,11 @@ exports.sourceNodes = async (
             }
           )
           .then((docList) => {
-            //console.log('wikiArticles[i]', wikiArticles[i])
-            //console.log('docList.title()', docList.title())
-            //console.log('typeof docList[0]', typeof docList[0])
             if (typeof docList[0] === 'undefined') {
               // docList is normally an array of objects, but due to a quirk in wtf_wikipedia it becomes just an object if there's just 1 result of the fetch. So we need to make an array of it. (NB wtf_wikipedia also deduplicates so [ 'Cosmology', 'https://en.wikipedia.org/wiki/Cosmology'] returns 1 result.)
               // See issue Fetching an array does not return array if there's just one item #418 https://github.com/spencermountain/wtf_wikipedia/issues/418
               docList = [docList];
             }
-            //console.log('docList.title()', docList[0].title())
             return docList.map((doc) => {
               // Get URL of the first image, if any https://www.npmjs.com/package/wtf-plugin-image
               let firstImageURL = doc.image(0);
@@ -197,7 +175,6 @@ exports.sourceNodes = async (
                 summary: doc.summary(),
                 extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
                 extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
-                //firstImage: doc.image(0)?.url(), // the full-size wikimedia-hosted url // https://github.com/spencermountain/wtf_wikipedia#docimages
                 firstImage: firstImageURL,
               };
             });
@@ -232,35 +209,27 @@ exports.sourceNodes = async (
 
     // Processing requestArticle.
     var requestArticle = page.requestArticle;
-    //console.log('requestArticle', requestArticle)
 
     // Processing requestLang
     var requestLang = page.requestLang;
-    //console.log('requestLang', requestLang)
 
     // Processing title
     var title = page.title;
-    //console.log('title', title)
 
     // Processing URL
     var url = page.url;
-    //console.log('url', url)
 
     // Processing summary
     var summary = page.summary;
-    //console.log('summary', summary)
 
     // Processing extract
     var extract = page.extract;
-    //console.log('extract', extract)
 
     // Processing extract (in HTML)
     var extractHTML = page.extractHTML;
-    //console.log('extractHTML', extractHTML)
 
     // Processing firstImage
     var firstImage = page.firstImage;
-    //console.log('firstImage', firstImage)
 
     // Create a local version of the remote image. See https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/
     // https://www.gatsbyjs.com/plugins/gatsby-source-filesystem/
@@ -269,7 +238,6 @@ exports.sourceNodes = async (
       // Create an image node only if firstImage is an empty string.
       fileNode = await createRemoteFileNode({
         url: firstImage,
-        //parentNodeId: nodeID,
         createNode,
         createNodeId,
         cache,
@@ -287,9 +255,7 @@ exports.sourceNodes = async (
       extract: extract,
       extractHTML: extractHTML,
       firstImage: firstImage,
-      //localFile: fileNode ? fileNode.id : '',
     };
-    //console.log('nodeData', nodeData)
 
     // Compulsory fields; see https://www.gatsbyjs.com/docs/reference/config-files/actions/#createNode
     var nodeMeta = {
@@ -298,19 +264,26 @@ exports.sourceNodes = async (
       children: [],
       internal: {
         type: `WikipediaFetcher`,
-        //mediaType: `text/html`, // Optional.
-        //content: JSON.stringify(myData), // Optional.
         contentDigest: createContentDigest(nodeData), // Compulsory.
       },
     };
-    //console.log('nodeMeta', nodeMeta)
 
     // Now create the node.
     var node = Object.assign({}, nodeData, nodeMeta);
-    // if the file was created, attach the new node to the parent node
+    // https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/creating-a-source-plugin/#create-remote-file-node-from-a-url
     if (fileNode) {
-      node.localFile___NODE = fileNode.id;
+      node.localFile = fileNode.id;
     }
     createNode(node);
   });
+};
+
+// https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/creating-a-source-plugin/#create-remote-file-node-from-a-url
+exports.createSchemaCustomization = ({ actions }) => {
+  const { createTypes } = actions;
+  createTypes(`
+    type WikipediaFetcher implements Node {
+      localFile: File @link
+    }
+  `);
 };
