@@ -270,20 +270,10 @@ exports.sourceNodes = async (
 
     // Now create the node.
     var node = Object.assign({}, nodeData, nodeMeta);
-    // https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/creating-a-source-plugin/#create-remote-file-node-from-a-url
+    // if the file was created, attach the new node to the parent node
     if (fileNode) {
-      node.localFile = fileNode.id;
+      node.localFile___NODE = fileNode.id;
     }
     createNode(node);
   });
-};
-
-// https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/creating-a-source-plugin/#create-remote-file-node-from-a-url
-exports.createSchemaCustomization = ({ actions }) => {
-  const { createTypes } = actions;
-  createTypes(`
-    type WikipediaFetcher implements Node {
-      localFile: File @link
-    }
-  `);
 };
