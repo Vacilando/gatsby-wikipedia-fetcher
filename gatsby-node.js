@@ -159,8 +159,14 @@ exports.sourceNodes = async (
               let firstImageURL = doc.image(0);
               if (firstImageURL) {
                 firstImageURL = firstImageURL.commonsURL();
-                if (!firstImageURL.match(/.(jpg|jpeg|png|gif)$/i)) {
-                  // Only allow jpg|jpeg|png|gif
+                let imgext = "jpg|jpeg|png|gif" // By default allow only jpg|jpeg|png|gif
+                if (pluginOptions.imgext) {
+                  imgext = pluginOptions.imgext
+                }
+                imgext = ".(" + imgext + ")$" // Eg ".(jpg|jpeg|png|gif)$"
+                imgext = new RegExp(imgext, 'i')
+                //if (!firstImageURL.match(/.(jpg|jpeg|png|gif)$/i)) {
+                if (!firstImageURL.match(imgext)) {
                   firstImageURL = '';
                 }
               } else {
@@ -189,8 +195,8 @@ exports.sourceNodes = async (
         // Report - but just once! - whether we use cache or not
         reporter.info(
           '[gatsby-wikipedia-fetcher] Fetching ' +
-            wikiArticlesLanguages.length +
-            ' items from Wikipedia API.'
+          wikiArticlesLanguages.length +
+          ' items from Wikipedia API.'
         );
         cacheReported = true;
       }
@@ -200,8 +206,8 @@ exports.sourceNodes = async (
         // Report - but just once! - whether we use cache or not
         reporter.info(
           '[gatsby-wikipedia-fetcher] Fetching ' +
-            wikiArticlesLanguages.length +
-            ' Wikipedia items from Gatsby cache.'
+          wikiArticlesLanguages.length +
+          ' Wikipedia items from Gatsby cache.'
         );
         cacheReported = true;
       }

@@ -49,8 +49,10 @@ module.exports = {
       options: {
         // E-mail address to be included in the Wikipedia API calls to limit the risk of being blacklisted.
         email: `user@example.com`,
-        // How many seconds to keep the fetched Wikipedia data in Gatsby cache.
+        // How many seconds to keep the fetched Wikipedia data in Gatsby build cache. Default value is 0 (= no caching).
         cache: 3600 * 24,
+        // Supported image extensions separated by "|". Default: "jpg|jpeg|png|gif"
+        imgext: "jpg|jpeg|png|gif",
       },
     },
   ],
