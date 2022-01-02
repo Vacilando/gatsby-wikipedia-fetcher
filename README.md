@@ -95,7 +95,7 @@ getNodes().forEach((node) => {
 });
 ```
 
-4. In your http://localhost:8000/\_\_\_graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
+4. In your http://localhost:8000/___graphql you will find new items "allWikipediaFetcher" and "wikipediaFetcher" populated with data fetched from the specified Wikipedia pages.
 
 ## Demo page
 
