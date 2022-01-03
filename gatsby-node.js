@@ -143,8 +143,8 @@ exports.sourceNodes = async (
         wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
           .fetch(
             wikiArticlesLanguages[i].article,
-            wikiArticlesLanguages[i].language,
             {
+              lang: wikiArticlesLanguages[i].language,
               'Api-User-Agent': wikiUserAgentMail,
             }
           )
