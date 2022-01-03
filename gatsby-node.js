@@ -156,7 +156,7 @@ exports.sourceNodes = async (
             }
             return docList.map((doc) => {
               // Get URL of the first image, if any https://www.npmjs.com/package/wtf-plugin-image
-              let firstImageURL = doc.image(0);
+              let firstImageURL = doc.mainImage();
               if (firstImageURL) {
                 firstImageURL = firstImageURL.commonsURL();
                 let imgext = "jpg|jpeg|png|gif" // By default allow only jpg|jpeg|png|gif
@@ -179,8 +179,8 @@ exports.sourceNodes = async (
                 title: doc.title(),
                 url: doc.url(), // (try to) generate the url for the current article
                 summary: doc.summary(),
-                extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
-                extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
+                extract: doc.sections()[0].text(),
+                extractHTML: doc.sections()[0].html({ images: false }),
                 firstImage: firstImageURL,
               };
             });
