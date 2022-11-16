@@ -143,8 +143,8 @@ exports.sourceNodes = async (
         wtf // Just 1 call for multiple wikipedia pages is good behaviour towards their API. Inspired by https://observablehq.com/@spencermountain/wtf_wikipedia-tutorial
           .fetch(
             wikiArticlesLanguages[i].article,
-            wikiArticlesLanguages[i].language,
             {
+              lang: wikiArticlesLanguages[i].language,
               'Api-User-Agent': wikiUserAgentMail,
             }
           )
@@ -156,11 +156,17 @@ exports.sourceNodes = async (
             }
             return docList.map((doc) => {
               // Get URL of the first image, if any https://www.npmjs.com/package/wtf-plugin-image
-              let firstImageURL = doc.image(0);
+              let firstImageURL = doc.mainImage();
               if (firstImageURL) {
                 firstImageURL = firstImageURL.commonsURL();
-                if (!firstImageURL.match(/.(jpg|jpeg|png|gif)$/i)) {
-                  // Only allow jpg|jpeg|png|gif
+                let imgext = "jpg|jpeg|png|gif" // By default allow only jpg|jpeg|png|gif
+                if (pluginOptions.imgext) {
+                  imgext = pluginOptions.imgext
+                }
+                imgext = ".(" + imgext + ")$" // Eg ".(jpg|jpeg|png|gif)$"
+                imgext = new RegExp(imgext, 'i')
+                //if (!firstImageURL.match(/.(jpg|jpeg|png|gif)$/i)) {
+                if (!firstImageURL.match(imgext)) {
                   firstImageURL = '';
                 }
               } else {
@@ -173,8 +179,8 @@ exports.sourceNodes = async (
                 title: doc.title(),
                 url: doc.url(), // (try to) generate the url for the current article
                 summary: doc.summary(),
-                extract: doc.sections(0).text(), // See https://github.com/spencermountain/wtf_wikipedia/issues/413
-                extractHTML: doc.sections(0).html({ images: false }), // See https://github.com/spencermountain/wtf_wikipedia/issues/413 // https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/html // https://github.com/spencermountain/wtf_wikipedia/issues/415
+                extract: doc.sections()[0].text(),
+                extractHTML: doc.sections()[0].html({ images: false }),
                 firstImage: firstImageURL,
               };
             });
@@ -189,8 +195,8 @@ exports.sourceNodes = async (
         // Report - but just once! - whether we use cache or not
         reporter.info(
           '[gatsby-wikipedia-fetcher] Fetching ' +
-            wikiArticlesLanguages.length +
-            ' items from Wikipedia API.'
+          wikiArticlesLanguages.length +
+          ' items from Wikipedia API.'
         );
         cacheReported = true;
       }
@@ -200,8 +206,8 @@ exports.sourceNodes = async (
         // Report - but just once! - whether we use cache or not
         reporter.info(
           '[gatsby-wikipedia-fetcher] Fetching ' +
-            wikiArticlesLanguages.length +
-            ' Wikipedia items from Gatsby cache.'
+          wikiArticlesLanguages.length +
+          ' Wikipedia items from Gatsby cache.'
         );
         cacheReported = true;
       }
